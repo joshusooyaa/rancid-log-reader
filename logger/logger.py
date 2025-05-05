@@ -1,6 +1,8 @@
 import structlog
 import sys
 import time
+import os
+from datetime import datetime
 from typing import Any, Dict
 
 def reorder_fields(logger, method_name, event_dict):
@@ -36,19 +38,10 @@ def add_stack_info(logger, method_name, event_dict):
 # Configure structlog
 structlog.configure(
     processors=[
-        # Add timestamp first
         structlog.processors.TimeStamper(fmt="iso"),
-        # Add log level second
         structlog.stdlib.add_log_level,
-        # Add our custom stack info
-        add_stack_info,
-        # Format the exception info if it exists
         structlog.processors.format_exc_info,
-        # Ensure we have the event field
-        structlog.processors.EventRenamer("event"),
-        # Reorder fields
-        reorder_fields,
-        # Convert to JSON
+        structlog.processors.StackInfoRenderer(),
         structlog.processors.JSONRenderer()
     ],
     context_class=dict,
@@ -60,7 +53,7 @@ structlog.configure(
 # Create logger instance
 logger = structlog.get_logger()
 
-def get_logger() -> structlog.BoundLogger:
+def get_logger():
     """
     Returns a configured structlog logger instance.
     
@@ -73,14 +66,14 @@ def get_logger() -> structlog.BoundLogger:
     return logger
 
 # Convenience methods for common log levels
-def info(msg: str, **kwargs: Any) -> None:
+def info(msg, **kwargs):
     """Log an info message with optional additional fields."""
     logger.info(msg, **kwargs)
 
-def warning(msg: str, **kwargs: Any) -> None:
+def warning(msg, **kwargs):
     """Log a warning message with optional additional fields."""
     logger.warning(msg, **kwargs)
 
-def error(msg: str, **kwargs: Any) -> None:
+def error(msg, **kwargs):
     """Log an error message with optional additional fields."""
     logger.error(msg, **kwargs)
