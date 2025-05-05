@@ -21,6 +21,6 @@ if any(git_changes.values()):
   body += build_topdesk_ticket_changes(git_changes)
 
 if body:
-  body += f"\n\nNote: Microsoft Graph expires on {config['microsoft-graph']['expires']}"
+  body += "\n\nNote: Microsoft Graph expires on {0}".format(config['microsoft-graph']['expires'])
 
 #emailer.send(body) 
