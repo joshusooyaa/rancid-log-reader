@@ -52,16 +52,26 @@ def fetch_git_changes(base_path, client_ids):
 
   return changed_devices
 
-def process_git_diff(diff):
-  changed_devices = []
-  for line in diff.splitlines():
-    line = line.strip()
-    if "/" in line:
-      device = line.split("/")[-1]
-      if device not in changed_devices:
-        changed_devices.append(device)
-
-  return changed_devices
+def process_git_diff(diff_output):
+    """
+    Process git diff output to extract device names.
+    Returns a list of device names that were changed.
+    """
+    if not diff_output:
+      return []
+    
+    # Convert bytes to string if needed
+    if isinstance(diff_output, bytes):
+      diff_output = diff_output.decode('utf-8')
+    
+    changed_devices = []
+    for line in diff_output.split('\n'):
+      if "/" in line:
+        # Extract device name from path
+        device = line.split("/")[-1].strip()
+        if device and device not in changed_devices:
+          changed_devices.append(device)
+    return changed_devices
 
 def build_topdesk_ticket_logins(failed_logins):
   body = "Rancid has been unable to log into the following devices in the past 24 hours:\n"
