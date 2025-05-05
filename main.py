@@ -22,4 +22,5 @@ if any(git_changes.values()):
 if body:
   body += "\n\nNote: Microsoft Graph expires on {0}".format(config['microsoft-graph']['expires'])
 
-#emailer.send(body) 
+if body:
+  emailer.send(body) 
