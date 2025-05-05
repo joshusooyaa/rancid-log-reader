@@ -1,7 +1,8 @@
 import os
 import re
 from pathlib import Path
-
+import subprocess
+from logger.logger import logger
 
 def get_rancid_logs(log_path):
   log_files = os.listdir(log_path)
@@ -29,15 +30,49 @@ def fetch_failed_logins(log_file):
   for line in lines:
     if "error" in line:
       device = line.split()[0]
-      print(device)
       if device not in devices:
         devices.append(device)
 
   return devices
 
-def build_topdesk_ticket(failed_logins):
+def fetch_git_changes(base_path, client_ids):
+  changed_devices = {}
+  for client_id in client_ids:
+    changed_devices[client_id] = []
+    client_id = client_id.upper()
+    client_path = base_path + "/" + client_id    
+    if os.path.isdir(client_path):
+      try:
+        result = subprocess.run(["git", "diff", "--name-only", "@{24 hours ago}", "HEAD"], cwd=client_path, capture_output=True, text=True)
+        changed_devices[client_id] = process_git_diff(result.stdout)
+      except:
+        logger.error(f"Error fetching git changes for {client_id}")
+
+  return changed_devices
+
+def process_git_diff(diff):
+  changed_devices = []
+  for line in diff.splitlines():
+    line = line.strip()
+    if "/" in line:
+      device = line.split("/")[-1]
+      if device not in changed_devices:
+        changed_devices.append(device)
+  
+  return changed_devices
+
+def build_topdesk_ticket_logins(failed_logins):
   body = "Rancid has been unable to log into the following devices in the past 24 hours:\n"
   for client_id, devices in failed_logins.items():
+    if devices:
+      device_list = ", ".join(devices)
+      body += f"{client_id}: {device_list}\n"
+    
+  return body
+
+def build_topdesk_ticket_changes(changed_devices):
+  body = "The following devices have been changed in the past 24 hours:\n"
+  for client_id, devices in changed_devices.items():
     if devices:
       device_list = ", ".join(devices)
       body += f"{client_id}: {device_list}\n"

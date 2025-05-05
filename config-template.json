@@ -1,3 +1,15 @@
 {
-  "rancid-log-path": "/var/lib/rancid/config/logs"
+  "rancid-config-path": "/var/lib/rancid/configs",
+  "rancid-log-path": "/var/lib/rancid/configs/logs",
+  "microsoft-graph": {
+    "client-id": "",
+    "client-secret": "",
+    "tenant-id": "",
+    "email-details": {
+      "sender": "sender",
+      "recipient": "recipient",
+      "subject": "Daily Rancid Update"
+    },
+    "expires": "5/5/2027"
+  }
 }
