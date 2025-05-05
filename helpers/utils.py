@@ -29,8 +29,17 @@ def fetch_failed_logins(log_file):
   for line in lines:
     if "error" in line:
       device = line.split()[0]
+      print(device)
       if device not in devices:
         devices.append(device)
 
   return devices
 
+def build_topdesk_ticket(failed_logins):
+  body = "Rancid has been unable to log into the following devices in the past 24 hours:\n"
+  for client_id, devices in failed_logins.items():
+    if devices:
+      device_list = ", ".join(devices)
+      body += f"{client_id}: {device_list}\n"
+    
+  return body
