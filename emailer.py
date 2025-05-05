@@ -4,7 +4,7 @@ import time
 import os
 
 class Emailer:
-  def __init__(self, config, logger):
+  def __init__(self, config):
     self.client_id = config['microsoft-graph']['client-id']
     self.client_secret = config['microsoft-graph']['client-secret']
     self.tenant_id = config['microsoft-graph']['tenant-id']
@@ -16,7 +16,6 @@ class Emailer:
     self.sender = config['microsoft-graph']['email-details']['sender']
     self.subject = config['microsoft-graph']['email-details']['subject']
     self.recipient = config['microsoft-graph']['email-details']['recipient']
-    self.logger = logger
   
   def _get_access_token(self):
     if self.access_token is None or time.time() > self.token_expiration:
@@ -26,17 +25,14 @@ class Emailer:
         'client_secret': self.client_secret,
         'grant_type': 'client_credentials'
       }
-      self.logger.info("Fetching token info from {}".format(self.token_url))
       response = requests.post(self.token_url, data=payload)
       if response.status_code == 200:
         token_info = response.json()
         self.access_token = token_info['access_token']
         self.token_expiration = time.time() + token_info['expires_in'] - 300
       else:
-        self.logger.error('Could not obtain access token: {0}'.format(response.text))
         return False
 
-    self.logger.info('Access token obtained')
     return self.access_token
 
   def _fetch_message(self, body):
@@ -71,8 +67,8 @@ class Emailer:
 
       response = requests.post(url, headers=headers, json=email)
       if response.status_code == 202:
-        self.logger.info('Email successfully sent.')
+        return True
       else:
-        self.logger.error('Could not send email', response=response.text, email=email, url=url)
+        return False
     else:
       return False

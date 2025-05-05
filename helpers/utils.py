@@ -1,7 +1,6 @@
 import os
 import re
 import subprocess
-from logger.logger import logger
 
 def get_rancid_logs(log_path):
   log_files = os.listdir(log_path)
@@ -49,7 +48,7 @@ def fetch_git_changes(base_path, client_ids):
         )
         changed_devices[client_id] = process_git_diff(result)
       except subprocess.CalledProcessError as e:
-        logger.error("Error fetching git changes for {0}: {1}".format(client_id, e.output))
+        print(e)
 
   return changed_devices
 

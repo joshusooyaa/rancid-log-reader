@@ -1,10 +1,9 @@
 from helpers.config_loader import ConfigLoader
-from logger.logger import logger
 from helpers.utils import *
 from emailer import Emailer
 
 config = ConfigLoader()
-emailer = Emailer(config, logger)
+emailer = Emailer(config)
 
 failed_logins = {}
 log_files = get_rancid_logs(config['rancid-log-path'])
